@@ -1,9 +1,10 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using RentEase.API.Data;
+using RentEase.API.Mappings;
 using RentEase.API.Repositories;
 using RentEase.API.Services;
-using RentEase.API.Validators;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,10 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddAutoMapper(
+    cfg => { },
+    typeof(PropertyMappingProfile).Assembly);
 
 var app = builder.Build();
 
