@@ -1,4 +1,6 @@
 namespace RentEase.API.DTOs.Properties;
+using RentEase.API.Enum;
+
 
 public class UpdatePropertyRequest
 {
@@ -10,7 +12,7 @@ public class UpdatePropertyRequest
 
     public string City { get; set; } = string.Empty;
 
-    public string PropertyType { get; set; } = string.Empty;
+    public PropertyType PropertyType { get; set; } 
 
     public int Bedrooms { get; set; }
 

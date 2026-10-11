@@ -15,6 +15,10 @@ public class AppDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Property>()
+            .Property(property => property.PropertyType)
+            .HasConversion<string>();
+        
+        modelBuilder.Entity<Property>()
             .HasOne(property => property.Owner)
             .WithMany()
             .HasForeignKey(property => property.OwnerId)

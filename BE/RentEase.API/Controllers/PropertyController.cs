@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using RentEase.API.DTOs.Properties;
 using RentEase.API.Services;
@@ -9,10 +10,15 @@ namespace RentEase.API.Controllers;
 public class PropertyController : ControllerBase
 {
     private readonly IPropertyService _propertyService;
+    private readonly IValidator<CreatePropertyRequest> _createPropertyValidator;
+    private readonly IValidator<UpdatePropertyRequest> _updatePropertyRequestValidator;
 
-    public PropertyController(IPropertyService propertyService)
+
+    public PropertyController(IPropertyService propertyService, IValidator<CreatePropertyRequest> createPropertyValidator,IValidator<UpdatePropertyRequest> updatePropertyRequestValidator)
     {
         _propertyService = propertyService;
+        _createPropertyValidator = createPropertyValidator;
+        _updatePropertyRequestValidator = updatePropertyRequestValidator;
     }
 
     [HttpGet]
@@ -39,6 +45,21 @@ public class PropertyController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(CreatePropertyRequest request)
     {
+        var validationResult =
+            await _createPropertyValidator.ValidateAsync(request);
+
+        if (!validationResult.IsValid)
+        {
+            var errors = validationResult.Errors
+                .GroupBy(error => error.PropertyName)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.Select(error => error.ErrorMessage).ToArray()
+                );
+
+            return BadRequest(new { errors });
+        }
+
         var property = await _propertyService.CreateAsync(request);
 
         return CreatedAtAction(
@@ -47,21 +68,51 @@ public class PropertyController : ControllerBase
             property
         );
     }
-
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(
+    
+   
+    [HttpPut("{id:long}")]
+    public async Task<IActionResult> UpdateProperty(
         long id,
-        UpdatePropertyRequest request)
+        [FromBody] UpdatePropertyRequest request)
     {
-        var property = await _propertyService.UpdateAsync(id, request);
+        // 1. Validate the request
+        var validationResult =
+            await _updatePropertyRequestValidator.ValidateAsync(request);
 
-        if (property == null)
+        if (!validationResult.IsValid)
         {
-            return NotFound();
+            var errors = validationResult.Errors
+                .GroupBy(error => error.PropertyName)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.Select(error => error.ErrorMessage).ToArray()
+                );
+
+            return BadRequest(new
+            {
+                message = "Validation failed.",
+                errors
+            });
         }
 
-        return Ok(property);
+        // 2. Update the property
+        var updatedProperty =
+            await _propertyService.UpdateAsync(id, request);
+
+        // 3. Check whether the property exists
+        if (updatedProperty == null)
+        {
+            return NotFound(new
+            {
+                message = $"Property with ID {id} was not found."
+            });
+        }
+
+        // 4. Return the updated property
+        return Ok(updatedProperty);
     }
+
+
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(long id)

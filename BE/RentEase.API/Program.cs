@@ -1,7 +1,9 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using RentEase.API.Data;
 using RentEase.API.Repositories;
 using RentEase.API.Services;
+using RentEase.API.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,8 @@ builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
 
 // Add services to the container.
 builder.Services.AddScoped<IPropertyService, PropertyService>();
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreatePropertyRequestValidator>();
 
 builder.Services.AddControllers();
 

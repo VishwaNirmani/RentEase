@@ -1,4 +1,5 @@
 namespace RentEase.API.Entities;
+using RentEase.API.Enum;
 
 public class Property
 {
@@ -14,7 +15,7 @@ public class Property
 
     public string City { get; set; } = string.Empty;
 
-    public string PropertyType { get; set; } = string.Empty;
+    public  PropertyType PropertyType{ get; set; } 
 
     public int Bedrooms { get; set; }
 

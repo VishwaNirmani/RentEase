@@ -1,8 +1,13 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace RentEase.API.DTOs.Properties;
+using RentEase.API.Enum;
+
 
 public class CreatePropertyRequest
 {
     public long OwnerId { get; set; }
+
 
     public string Title { get; set; } = string.Empty;
 
@@ -12,7 +17,7 @@ public class CreatePropertyRequest
 
     public string City { get; set; } = string.Empty;
 
-    public string PropertyType { get; set; } = string.Empty;
+    public required PropertyType PropertyType { get; set; }
 
     public int Bedrooms { get; set; }
 
