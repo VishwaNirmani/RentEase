@@ -1,6 +1,6 @@
 using RentEase.API.DTOs.Properties;
 
-namespace RentEase.API.Services;
+namespace RentEase.API.Services.Interfaces;
 
 public interface IPropertyService
 {

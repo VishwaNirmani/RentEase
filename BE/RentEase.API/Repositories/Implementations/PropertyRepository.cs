@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using RentEase.API.Data;
 using RentEase.API.Entities;
+using RentEase.API.Repositories.Interfaces;
 
-namespace RentEase.API.Repositories;
+namespace RentEase.API.Repositories.Implementations;
 
 public class PropertyRepository : IPropertyRepository
 {

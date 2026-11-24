@@ -23,5 +23,15 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(property => property.OwnerId)
             .OnDelete(DeleteBehavior.Restrict);
+        
+        modelBuilder.Entity<User>()
+            .Property(user => user.Role)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<User>()
+            .HasIndex(user => user.Email)
+            .IsUnique();
     }
+    
+    
 }

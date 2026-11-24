@@ -1,6 +1,6 @@
 using RentEase.API.Entities;
 
-namespace RentEase.API.Repositories;
+namespace RentEase.API.Repositories.Interfaces;
 
 public interface IPropertyRepository
 {

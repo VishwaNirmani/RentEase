@@ -9,8 +9,7 @@ public class PropertyMappingProfile : Profile
     public PropertyMappingProfile()
     {
         // Create property
-        CreateMap<CreatePropertyRequest, Property>()
-            .ForMember(dest => dest.Owner, opt => opt.Ignore());
+        CreateMap<CreatePropertyRequest, Property>();
 
         // Update property
         CreateMap<UpdatePropertyRequest, Property>()

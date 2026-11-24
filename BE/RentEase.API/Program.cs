@@ -1,10 +1,17 @@
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-using RentEase.API.Data;
-using RentEase.API.Mappings;
-using RentEase.API.Repositories;
-using RentEase.API.Services;
 
+using System.Text;
+using FluentValidation;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using RentEase.API.Data;
+using RentEase.API.Entities;
+using RentEase.API.Mappings;
+using RentEase.API.Repositories.Implementations;
+using RentEase.API.Repositories.Interfaces;
+using RentEase.API.Services.Implementations;
+using RentEase.API.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,26 +20,72 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));
+
 // Add repositories
 builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-// Add services to the container.
+// Add services
 builder.Services.AddScoped<IPropertyService, PropertyService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
+// Add password hasher
+builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
+
+// Add validators
 builder.Services.AddValidatorsFromAssemblyContaining<CreatePropertyRequestValidator>();
 
+// Add controllers and Swagger
 builder.Services.AddControllers();
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add AutoMapper
 builder.Services.AddAutoMapper(
     cfg => { },
     typeof(PropertyMappingProfile).Assembly);
 
+// JWT configuration
+var jwtKey = builder.Configuration["Jwt:Key"]
+    ?? throw new InvalidOperationException("JWT Key is missing.");
+
+var jwtIssuer = builder.Configuration["Jwt:Issuer"]
+    ?? throw new InvalidOperationException("JWT Issuer is missing.");
+
+var jwtAudience = builder.Configuration["Jwt:Audience"]
+    ?? throw new InvalidOperationException("JWT Audience is missing.");
+
+// JWT authentication
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtKey)),
+
+            ValidateIssuer = true,
+            ValidIssuer = jwtIssuer,
+
+            ValidateAudience = true,
+            ValidAudience = jwtAudience,
+
+            ValidateLifetime = true,
+
+            ClockSkew = TimeSpan.FromMinutes(1)
+        };
+    });
+
+// Authorization
+builder.Services.AddAuthorization();
+
+// Build application
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -40,6 +93,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+
+app.UseAuthorization();
 
 app.MapControllers();
 

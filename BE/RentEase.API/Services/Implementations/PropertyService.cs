@@ -1,10 +1,10 @@
-
 using AutoMapper;
 using RentEase.API.DTOs.Properties;
 using RentEase.API.Entities;
-using RentEase.API.Repositories;
+using RentEase.API.Repositories.Interfaces;
+using RentEase.API.Services.Interfaces;
 
-namespace RentEase.API.Services;
+namespace RentEase.API.Services.Implementations;
 
 public class PropertyService : IPropertyService
 {

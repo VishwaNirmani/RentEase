@@ -2,6 +2,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using RentEase.API.DTOs.Properties;
 using RentEase.API.Services;
+using RentEase.API.Services.Interfaces;
 
 namespace RentEase.API.Controllers;
 

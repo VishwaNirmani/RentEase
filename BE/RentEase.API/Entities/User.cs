@@ -1,3 +1,5 @@
+using RentEase.API.Enum;
+
 namespace RentEase.API.Entities;
 
 public class User
@@ -14,7 +16,7 @@ public class User
 
     public string PhoneNumber { get; set; } = string.Empty;
 
-    public string Role { get; set; } = string.Empty;
+    public UserRole Role { get; set; } = UserRole.Tenant;
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
