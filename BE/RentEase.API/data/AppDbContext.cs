@@ -9,8 +9,9 @@ public class AppDbContext : DbContext
         : base(options)
     {
     }
-    public DbSet<User> Users { get; set; }
+    public DbSet<User> Users { get; set; } 
     public DbSet<Property> Properties { get; set; }
+    public DbSet<Booking> Bookings { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -31,6 +32,21 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(user => user.Email)
             .IsUnique();
+        modelBuilder.Entity<Booking>()
+            .Property(booking => booking.Status)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<Booking>()
+            .HasOne(booking => booking.Tenant)
+            .WithMany()
+            .HasForeignKey(booking => booking.TenantId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Booking>()
+            .HasOne(booking => booking.Property)
+            .WithMany()
+            .HasForeignKey(booking => booking.PropertyId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
     
     
