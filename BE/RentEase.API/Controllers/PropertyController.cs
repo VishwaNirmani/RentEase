@@ -1,8 +1,10 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RentEase.API.DTOs.Properties;
 using RentEase.API.Services;
 using RentEase.API.Services.Interfaces;
+using System.Security.Claims;
 
 namespace RentEase.API.Controllers;
 
@@ -21,7 +23,7 @@ public class PropertyController : ControllerBase
         _createPropertyValidator = createPropertyValidator;
         _updatePropertyRequestValidator = updatePropertyRequestValidator;
     }
-
+    [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -43,9 +45,16 @@ public class PropertyController : ControllerBase
         return Ok(property);
     }
 
+    [Authorize(Roles = "Owner")]
     [HttpPost]
     public async Task<IActionResult> Create(CreatePropertyRequest request)
     {
+        // Get the logged-in user's ID from JWT claims
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!long.TryParse(userIdClaim, out var userId))
+            return Unauthorized();
+
         var validationResult =
             await _createPropertyValidator.ValidateAsync(request);
 
@@ -61,7 +70,7 @@ public class PropertyController : ControllerBase
             return BadRequest(new { errors });
         }
 
-        var property = await _propertyService.CreateAsync(request);
+        var property = await _propertyService.CreateAsync(userId, request);
 
         return CreatedAtAction(
             nameof(GetById),
@@ -69,14 +78,22 @@ public class PropertyController : ControllerBase
             property
         );
     }
-    
    
+    [Authorize(Roles = "Owner")]
     [HttpPut("{id:long}")]
     public async Task<IActionResult> UpdateProperty(
         long id,
         [FromBody] UpdatePropertyRequest request)
     {
-        // 1. Validate the request
+        // Get logged-in user's ID from JWT
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!long.TryParse(userIdClaim, out var userId))
+        {
+            return Unauthorized();
+        }
+
+        // Validate request
         var validationResult =
             await _updatePropertyRequestValidator.ValidateAsync(request);
 
@@ -96,35 +113,54 @@ public class PropertyController : ControllerBase
             });
         }
 
-        // 2. Update the property
-        var updatedProperty =
-            await _propertyService.UpdateAsync(id, request);
-
-        // 3. Check whether the property exists
-        if (updatedProperty == null)
+        try
         {
-            return NotFound(new
-            {
-                message = $"Property with ID {id} was not found."
-            });
-        }
+            var updatedProperty =
+                await _propertyService.UpdateAsync(id, userId, request);
 
-        // 4. Return the updated property
-        return Ok(updatedProperty);
+            if (updatedProperty == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(updatedProperty);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
+        }
     }
 
 
-
-    [HttpDelete("{id}")]
+    [Authorize(Roles = "Owner")]
+    [HttpDelete("{id:long}")]
     public async Task<IActionResult> Delete(long id)
     {
-        var deleted = await _propertyService.DeleteAsync(id);
+        // Get logged-in user's ID from JWT
+        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        if (!deleted)
+        if (!long.TryParse(userIdClaim, out var userId))
         {
-            return NotFound();
+            return Unauthorized();
         }
 
-        return NoContent();
+        try
+        {
+            var deleted = await _propertyService.DeleteAsync(id, userId);
+
+            if (!deleted)
+            {
+                return NotFound(new
+                {
+                    message = $"Property with ID {id} was not found."
+                });
+            }
+
+            return NoContent();
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return StatusCode(403, new { message = ex.Message });
+        }
     }
 }

@@ -41,9 +41,13 @@ public class PropertyService : IPropertyService
 
     
     public async Task<PropertyResponse> CreateAsync(
+        long userId,
         CreatePropertyRequest request)
     {
         var property = _mapper.Map<Property>(request);
+
+        // Assign the authenticated user's ID
+        property.OwnerId = userId;
 
         var createdProperty =
             await _propertyRepository.CreateAsync(property);
@@ -53,6 +57,7 @@ public class PropertyService : IPropertyService
 
     public async Task<PropertyResponse?> UpdateAsync(
         long id,
+        long userId,
         UpdatePropertyRequest request)
     {
         var property = await _propertyRepository.GetByIdAsync(id);
@@ -60,6 +65,13 @@ public class PropertyService : IPropertyService
         if (property == null)
         {
             return null;
+        }
+
+        // Check whether this property belongs to the logged-in user
+        if (property.OwnerId != userId)
+        {
+            throw new UnauthorizedAccessException(
+                "You are not allowed to update this property.");
         }
 
         _mapper.Map(request, property);
@@ -70,8 +82,22 @@ public class PropertyService : IPropertyService
         return _mapper.Map<PropertyResponse>(updatedProperty);
     }
 
-    public async Task<bool> DeleteAsync(long id)
+    public async Task<bool> DeleteAsync(long id, long userId)
     {
+        var property = await _propertyRepository.GetByIdAsync(id);
+
+        if (property == null)
+        {
+            return false;
+        }
+
+        // Check property ownership
+        if (property.OwnerId != userId)
+        {
+            throw new UnauthorizedAccessException(
+                "You are not allowed to delete this property.");
+        }
+
         return await _propertyRepository.DeleteAsync(id);
     }
 }

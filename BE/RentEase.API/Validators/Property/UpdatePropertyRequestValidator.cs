@@ -1,7 +1,7 @@
 using FluentValidation;
 using RentEase.API.DTOs.Properties;
 
-namespace RentEase.API.Validators;
+namespace RentEase.API.Validators.Property;
 
 public class UpdatePropertyRequestValidator:AbstractValidator<UpdatePropertyRequest>
 {

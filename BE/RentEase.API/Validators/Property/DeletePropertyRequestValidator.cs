@@ -1,4 +1,4 @@
-namespace RentEase.API.Validators;
+namespace RentEase.API.Validators.Property;
 
 public class DeletePropertyRequestValidator
 {

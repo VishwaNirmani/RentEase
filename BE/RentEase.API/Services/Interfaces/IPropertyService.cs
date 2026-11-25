@@ -8,12 +8,13 @@ public interface IPropertyService
 
     Task<PropertyResponse?> GetByIdAsync(long id);
 
-    Task<PropertyResponse> CreateAsync(CreatePropertyRequest request);
+    Task<PropertyResponse> CreateAsync(long userId, CreatePropertyRequest request);
 
     Task<PropertyResponse?> UpdateAsync(
         long id,
+        long userId,
         UpdatePropertyRequest request
     );
 
-    Task<bool> DeleteAsync(long id);
+    Task<bool> DeleteAsync(long id, long userId);
 }

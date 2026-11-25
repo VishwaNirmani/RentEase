@@ -12,6 +12,8 @@ using RentEase.API.Repositories.Implementations;
 using RentEase.API.Repositories.Interfaces;
 using RentEase.API.Services.Implementations;
 using RentEase.API.Services.Interfaces;
+using RentEase.API.Validators.Property;
+using Microsoft.OpenApi;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -38,8 +40,22 @@ builder.Services.AddValidatorsFromAssemblyContaining<CreatePropertyRequestValida
 // Add controllers and Swagger
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = "Enter your JWT token."
+    });
 
+    options.AddSecurityRequirement(document =>
+        new OpenApiSecurityRequirement
+        {
+            [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+        });
+});
 // Add AutoMapper
 builder.Services.AddAutoMapper(
     cfg => { },

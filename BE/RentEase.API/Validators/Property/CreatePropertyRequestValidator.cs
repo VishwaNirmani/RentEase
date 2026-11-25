@@ -1,6 +1,7 @@
 using FluentValidation;
-using RentEase.API.DTOs;
 using RentEase.API.DTOs.Properties;
+
+namespace RentEase.API.Validators.Property;
 
 public class CreatePropertyRequestValidator
     : AbstractValidator<CreatePropertyRequest>

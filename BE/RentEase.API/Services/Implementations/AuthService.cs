@@ -46,7 +46,7 @@ public class AuthService : IAuthService
             LastName = request.LastName.Trim(),
             Email = request.Email.Trim().ToLowerInvariant(),
             PhoneNumber = request.PhoneNumber ?? string.Empty,
-            Role = UserRole.Tenant
+            Role = UserRole.Owner
         };
 
         // Hash the password
