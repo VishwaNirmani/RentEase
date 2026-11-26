@@ -27,11 +27,13 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddScoped<IPropertyRepository, PropertyRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IBookingRepository, BookingRepository>();
+builder.Services.AddScoped<IOwnerApplicationRepository, OwnerApplicationRepository>();
 
 // Add services
 builder.Services.AddScoped<IPropertyService, PropertyService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
+builder.Services.AddScoped<IOwnerApplicationService, OwnerApplicationService>();
 
 // Add password hasher
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();

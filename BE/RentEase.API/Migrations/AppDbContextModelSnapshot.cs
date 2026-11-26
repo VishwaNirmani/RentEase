@@ -67,6 +67,43 @@ namespace RentEase.API.Migrations
                     b.ToTable("Bookings");
                 });
 
+            modelBuilder.Entity("RentEase.API.Entities.OwnerApplication", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AdminRemarks")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("SubmittedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("\"Status\" = 'Pending'");
+
+                    b.ToTable("OwnerApplications");
+                });
+
             modelBuilder.Entity("RentEase.API.Entities.Property", b =>
                 {
                     b.Property<long>("Id")
@@ -189,6 +226,17 @@ namespace RentEase.API.Migrations
                     b.Navigation("Tenant");
                 });
 
+            modelBuilder.Entity("RentEase.API.Entities.OwnerApplication", b =>
+                {
+                    b.HasOne("RentEase.API.Entities.User", "User")
+                        .WithMany("OwnerApplications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("RentEase.API.Entities.Property", b =>
                 {
                     b.HasOne("RentEase.API.Entities.User", "Owner")
@@ -198,6 +246,11 @@ namespace RentEase.API.Migrations
                         .IsRequired();
 
                     b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("RentEase.API.Entities.User", b =>
+                {
+                    b.Navigation("OwnerApplications");
                 });
 #pragma warning restore 612, 618
         }

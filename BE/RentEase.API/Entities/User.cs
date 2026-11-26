@@ -21,4 +21,7 @@ public class User
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public bool IsActive { get; set; } = true;
+
+    public ICollection<OwnerApplication> OwnerApplications { get; set; } =
+        new List<OwnerApplication>();
 }

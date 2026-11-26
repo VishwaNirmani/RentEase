@@ -12,6 +12,7 @@ public class AppDbContext : DbContext
     public DbSet<User> Users { get; set; } 
     public DbSet<Property> Properties { get; set; }
     public DbSet<Booking> Bookings { get; set; }
+    public DbSet<OwnerApplication> OwnerApplications { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -32,6 +33,22 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<User>()
             .HasIndex(user => user.Email)
             .IsUnique();
+
+        modelBuilder.Entity<OwnerApplication>()
+            .Property(application => application.Status)
+            .HasConversion<string>();
+
+        modelBuilder.Entity<OwnerApplication>()
+            .HasOne(application => application.User)
+            .WithMany(user => user.OwnerApplications)
+            .HasForeignKey(application => application.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<OwnerApplication>()
+            .HasIndex(application => application.UserId)
+            .IsUnique()
+            .HasFilter("\"Status\" = 'Pending'");
+
         modelBuilder.Entity<Booking>()
             .Property(booking => booking.Status)
             .HasConversion<string>();
